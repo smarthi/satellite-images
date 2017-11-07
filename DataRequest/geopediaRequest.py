@@ -1,6 +1,6 @@
 import requestDownload
 
-BASE_URL = 'http://service.geopedia.world/wms/ml_aws?service=WMS&request=GetMap&layers=ttl1903&styles=&format=image%2Fpng&transparent=false&version=1.1.1'
+BASE_URL = 'http://service.geopedia.world/wms/ml_aws?service=WMS&request=GetMap&layers=ttl1904&styles=&format=image%2Fpng&transparent=false&version=1.1.1'
 WGS84 = 3857
 PNG_FORMAT = 'png'
 DEFAULT_IMG_SIZE = (512, 512)

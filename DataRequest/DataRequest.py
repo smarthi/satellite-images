@@ -42,11 +42,11 @@ class TulipFieldRequest():
 
     Note: date argument is ignored at the moment
     """
-    def __init__(self, bbox, width, height, crs=4326, date=None):
+    def __init__(self, bbox, width, height, layer, crs=4326):
 
         self.source = 'geopedia'
         self.bbox = bbox
-        self.date = date
+        self.layer = layer
         self.crs = crs
         self.width = width
         self.height = height

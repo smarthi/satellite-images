@@ -7,7 +7,7 @@ import requestTime
 import indexService
 import requestDownload
 
-BASE_URL = 'http://services.sentinel-hub.com/v1/'
+BASE_URL = 'https://services.sentinel-hub.com/ogc/'
 
 TRUE_BAND = 'TRUE_COLOR'
 ALL_BANDS = 'ALL_BANDS' # important - this is only for eo-research instance

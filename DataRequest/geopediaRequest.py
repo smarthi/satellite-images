@@ -1,6 +1,6 @@
 import requestDownload
 
-BASE_URL = 'http://service.geopedia.world/wms/ml_aws?service=WMS&request=GetMap&layers=ttl1904&styles=&format=image%2Fpng&transparent=false&version=1.1.1'
+BASE_URL = 'http://service.geopedia.world/wms/ml_aws?service=WMS&request=GetMap&styles=&format=image%2Fpng&transparent=false&version=1.1.1'
 WGS84 = 3857
 PNG_FORMAT = 'png'
 DEFAULT_IMG_SIZE = (512, 512)
@@ -26,15 +26,15 @@ def get_geopedia_request(request):
     download_list = []
 
     bbox = ','.join(map(str, bbox))
-    url = get_geopedia_url(bbox, request.date, crs=crs, img_size=img_size)
+    url = get_geopedia_url(bbox, request.layer, crs=crs, img_size=img_size)
     download_list.append(requestDownload.DownloadRequest(url=url, return_data=True, data_type=img_format, verbose=False))
 
     return download_list
 
 
-def get_geopedia_url(bbox, date, crs, img_size=DEFAULT_IMG_SIZE):
+def get_geopedia_url(bbox, layer, crs, img_size=DEFAULT_IMG_SIZE):
 
-    url = BASE_URL + '&height=' + str(img_size[1]) \
+    url = BASE_URL+ '&layers='+str(layer) + '&height=' + str(img_size[1]) \
           + '&width=' + str(img_size[0]) + '&srs=EPSG:' + str(crs) \
           + '&bbox=' + bbox
 
@@ -58,3 +58,4 @@ def get_crs(data):
         return int(data)
     else:
         return WGS84
+

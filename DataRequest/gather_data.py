@@ -1,5 +1,6 @@
 import logging
 import pyproj
+import os
 import http.client as http_client
 from PIL import Image
 
@@ -18,25 +19,38 @@ def to_epsg3857(latlong_wgs84):
     wgs84 = pyproj.Proj(init='EPSG:4326')
     return pyproj.transform(wgs84,epsg3857,latlong_wgs84[1],latlong_wgs84[0])
 
-DIRECTORY = '/Users/kellens/Temp/Tulips/'
+
+def to_wgs84(latlong_epsg3857):
+    wgs84 = pyproj.Proj(init='EPSG:4326')
+    epsg3857 = pyproj.Proj(init='epsg:3857')
+    res = pyproj.transform(epsg3857,wgs84,latlong_epsg3857[0],latlong_epsg3857[1])
+    return [res[1], res[0]]
+
+DIRECTORY = 'images/'
 WMS_INSTANCE = '71513b0b-264d-494a-b8c4-c3c36433db28'
 layers = {'tulip_field_2016':'ttl1904', 'tulip_field_2017':'ttl1905', 'arable_land_2017':'ttl1917'}
 
-box_height = abs(526803.9989414361 - 531695.9687516851)
-box_width = abs(6966795.615281175 - 6971687.585091426)
-# Initialize me to bottom left
-starting_bottom_left = to_epsg3857((52.89646, 4.72131))
-starting_top_right = (starting_bottom_left[0] + box_height, starting_bottom_left[1] + box_width)
-bbox = [starting_bottom_left, starting_top_right]
 
+box_height = 1500
+box_width = 1500
+# Initialize me to bottom left and go to top right
+bottom_left = to_epsg3857((52.789241, 4.674931))
+top_right = to_epsg3857((52.956414, 4.824132))
+starting_top_right = (bottom_left[0] + box_height, bottom_left[1] + box_width)
+bbox = [bottom_left, starting_top_right]
+
+if not os.path.exists(DIRECTORY):
+    os.makedirs(DIRECTORY)
 
 def save_image(npdata, outfilename):
     img = Image.fromarray(npdata)
     img.save(outfilename)
 
 
-for i in range(0, 10):
-    for v in range(0, 10):
+for i in range(0, int(abs((bottom_left[0]-top_right[0])/box_height))):
+    temp_width = [bbox[0][1], bbox[1][1]]
+    for v in range(0, int(abs((bottom_left[1]-top_right[1])/box_width))):
+        logging.debug('Loading {},{}'.format(to_wgs84(bbox[0])[0], to_wgs84(bbox[0])[1]))
         tulip_fields = TulipFieldRequest(bbox=bbox, width=512, height=512, crs=3857, layer=layers['tulip_field_2016'])
         tulip_data = tulip_fields.get_data()
         save_image(tulip_data[0], '{}{}_{}_tulips_2016.bmp'.format(DIRECTORY, i, v))
@@ -46,4 +60,4 @@ for i in range(0, 10):
         sat_data = s2_request.get_data()
         save_image(sat_data[0], '{}{}_{}_sat_2016_05_01.bmp'.format(DIRECTORY, i, v))
         bbox = [(bbox[0][0], bbox[0][1] + box_width), (bbox[1][0], bbox[1][1] + box_width)]
-    bbox = [(bbox[0][0] + box_height, bbox[0][1]), (bbox[1][0] + box_height, bbox[1][1])]
+    bbox = [(bbox[0][0] + box_height, temp_width[0]), (bbox[1][0] + box_height, temp_width[1])]

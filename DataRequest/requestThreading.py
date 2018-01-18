@@ -8,7 +8,7 @@ try:
 except ImportError:
     import Queue as queue
 
-DEFAULT_THREAD_NUMBER = 8
+DEFAULT_THREAD_NUMBER = 1
 
 class ThreadedProcess():
     def __init__(self, input_list, process_function, thread_number=DEFAULT_THREAD_NUMBER):

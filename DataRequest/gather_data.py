@@ -34,8 +34,8 @@ layers = {'tulip_field_2016':'ttl1904', 'tulip_field_2017':'ttl1905', 'arable_la
 box_height = 1500
 box_width = 1500
 # Initialize me to bottom left and go to top right
-bottom_left = to_epsg3857((52.789241, 4.674931))
-top_right = to_epsg3857((52.956414, 4.824132))
+bottom_left = to_epsg3857((51.976331, 4.019444))
+top_right = to_epsg3857((53.513151, 6.620023))
 starting_top_right = (bottom_left[0] + box_height, bottom_left[1] + box_width)
 bbox = [bottom_left, starting_top_right]
 
@@ -53,11 +53,11 @@ for i in range(0, int(abs((bottom_left[0]-top_right[0])/box_height))):
         logging.debug('Loading {},{}'.format(to_wgs84(bbox[0])[0], to_wgs84(bbox[0])[1]))
         tulip_fields = TulipFieldRequest(bbox=bbox, width=512, height=512, crs=3857, layer=layers['tulip_field_2016'])
         tulip_data = tulip_fields.get_data()
-        save_image(tulip_data[0], '{}{}_{}_tulips_2016.bmp'.format(DIRECTORY, i, v))
+        save_image(tulip_data[0], '{}{}_{}_tulips_2016.bmp'.format(DIRECTORY, int(bbox[0][0]/box_height), int(bbox[0][1]/box_width)))
 
         s2_request = S2Request(WMS_INSTANCE, layers='TRUE_COLOR', time=('2016-05-01'), bbox=bbox,
                                width=512, height=512, crs=3857)
         sat_data = s2_request.get_data()
-        save_image(sat_data[0], '{}{}_{}_sat_2016_05_01.bmp'.format(DIRECTORY, i, v))
+        save_image(sat_data[0], '{}{}_{}_sat_2016_05_01.bmp'.format(DIRECTORY, int(bbox[0][0]/box_height), int(bbox[0][1]/box_width)))
         bbox = [(bbox[0][0], bbox[0][1] + box_width), (bbox[1][0], bbox[1][1] + box_width)]
     bbox = [(bbox[0][0] + box_height, temp_width[0]), (bbox[1][0] + box_height, temp_width[1])]

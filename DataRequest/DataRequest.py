@@ -7,7 +7,7 @@ class S2Request():
     Class for managing Sentinel 2 requests using Sentinel Hub's WMS service
     """
     def __init__(self, instance_id, crs=4326, data_format=None, bbox=None, layers=None, time=None,
-            width=None, height=None):
+            width=None, height=None, maxcc=100.):
 
         self.instance_id = instance_id
         self.source = 'wms'
@@ -18,7 +18,7 @@ class S2Request():
         self.crs = crs
         self.width = width
         self.height = height
-        self.maxcc = 100.
+        self.maxcc = maxcc
 
         self.request_is_valid = False
         self.download_list = []

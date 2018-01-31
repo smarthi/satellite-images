@@ -3,6 +3,7 @@ Script with useful time/date functions
 '''
 
 import datetime
+import time
 
 # returns list of dates, start_date and end_date included
 def get_dates_in_range(start_date, end_date):
@@ -32,3 +33,6 @@ def datetime_to_iso(date, only_date=True):
 def get_current_date():
     date = datetime.datetime.now()
     return datetime_to_iso(date)
+
+def sleep(sleep_time):
+    time.sleep(sleep_time)

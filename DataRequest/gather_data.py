@@ -10,6 +10,9 @@ import requestThreading
 from requestDownload import make_request, DownloadRequest
 import struct
 import binascii
+import json
+import datetime
+import glob
 
 from DataRequest import TulipFieldRequest, S2Request
 
@@ -53,6 +56,25 @@ class Patch(object):
         self.contained = self.polygon.contains(self.shapely)
         self.poly_sw = poly_sw
         self.id = binascii.hexlify(struct.pack('ffff', self.p1[1], self.p1[0], self.p2[1], self.p2[0]))
+
+
+class GeoJsonSaver:
+    """
+    Class to save geo json files so they can be used in future downloads. 
+    Files are stored in the specified dir, with the name 'polygon_hh_mm_ss.json,
+    where hh mm and ss refer to the time when the polygon was drawn'
+    """
+    def __init__(self, path):
+        self.path = path
+        if not os.path.exists(self.path):
+            logging.info('Directory {} does not exist, creating it'.format(self.path))
+            os.makedirs(self.path)
+
+    def __call__(self, controller, action, geo_json):
+        now = datetime.datetime.now()
+        filename = 'polygon_{}_{}_{}.json'.format(now.hour, now.minute, now.second)
+        with open(os.path.join(self.path, filename), 'w') as fp:
+            json.dump(geo_json, fp)
 
 
 class PolygonSlidingWindow(object):
@@ -123,6 +145,19 @@ class PolygonSlidingWindow(object):
             self.patches[active_set] = []
         self.patches[active_set].append(patches)
         return
+
+    def load_polygons_from_folder(self, folder):
+        """Adds all polygons described in .json files stored in the given folder"""
+        geojsons = glob.glob(folder + '*.json')
+        logging.debug('Found {} json files'.format(len(geojsons)))
+        for idx, fn in enumerate(geojsons):
+            with open(fn) as data_file:
+                geo_json = json.load(data_file)
+                if geo_json['geometry']['type'] != 'Polygon':
+                    logging.debug('File {} is not a valid geojson')
+                    continue
+                self.geo_jsons.append(geo_json)
+                self.add_polygon(geo_json['geometry']['coordinates'][0])
 
     def __call__(self, draw_controller, action, geo_json):
         if geo_json['geometry']['type'] != 'Polygon':

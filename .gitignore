@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# OS X
+*.DS_Store
+
+data/
+images/
+preprocessing/checkpoints/
+preprocessing/test/

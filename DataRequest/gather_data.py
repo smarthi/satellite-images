@@ -55,7 +55,7 @@ class Patch(object):
         self.shapely = geometry.box(self.p1[1], self.p1[0], self.p2[1], self.p2[0])
         self.contained = self.polygon.contains(self.shapely)
         self.poly_sw = poly_sw
-        self.id = binascii.hexlify(struct.pack('ffff', self.p1[1], self.p1[0], self.p2[1], self.p2[0]))
+        self.id = binascii.hexlify(struct.pack('ffff', self.p1[1], self.p1[0], self.p2[1], self.p2[0])).decode()
 
 
 class GeoJsonSaver:

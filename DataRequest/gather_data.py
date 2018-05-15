@@ -3,6 +3,7 @@ import pyproj
 import os
 import http.client as http_client
 import skimage.io as skio
+from PIL import Image
 from dateutil import parser
 from urllib import parse #from urlparse import urlparse
 from shapely import geometry
@@ -13,6 +14,8 @@ import binascii
 import json
 import datetime
 import glob
+import cv2
+import numpy as np
 
 from DataRequest import TulipFieldRequest, S2Request
 
@@ -208,10 +211,14 @@ class BatchDownloader(object):
 
     def imsave(self, data, patch, request):
         bbox = patch.bbox
+        data = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
         if self.requester.source == 'geopedia': # tulip data
             layer = self.requester_kwargs['layer']
             outfilename = '{}tulip_{}_geopedia_{}.png'.format(self.root_dir, patch.id, layer)
-            skio.imsave(outfilename, data)
+            gray = Image.fromarray(data).convert('L')
+            im_bw = cv2.bitwise_not(cv2.threshold(np.asarray(gray), 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1])
+            # bw = gray.point(lambda x: 0 if x*255<128 else 255, '1')
+            skio.imsave(outfilename, im_bw)
         if self.requester.source == 'wms' and self.requester_kwargs.get('layers') == 'TRUE_COLOR': # rgb image from S2
             layer = self.requester_kwargs['layers']
             logging.debug((patch, request))

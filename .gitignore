@@ -104,7 +104,8 @@ ENV/
 .mypy_cache/
 
 # data folder
-data/
+data/*
+!data/tulips/sample
 
 # model checkpoints
 preprocessing/checkpoints/

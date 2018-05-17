@@ -105,7 +105,7 @@ ENV/
 
 # data folder
 data/*
-!data/tulips/sample
+!data/sample
 
 # model checkpoints
 preprocessing/checkpoints/

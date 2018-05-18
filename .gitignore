@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# OS X
+*.DS_Store
+
 # Distribution / packaging
 .Python
 env/
@@ -101,8 +104,11 @@ ENV/
 .mypy_cache/
 
 # data folder
-data/
+data/*
+!data/sample
 
 # model checkpoints
 preprocessing/checkpoints/
 segmentation/checkpoints/
+preprocessing/test/
+

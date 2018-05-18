@@ -105,4 +105,4 @@ data/
 
 # model checkpoints
 preprocessing/checkpoints/
-
+segmentation/checkpoints/

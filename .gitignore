@@ -104,8 +104,10 @@ ENV/
 .mypy_cache/
 
 # data folder
-data/*
+data/cloud-classif/
+data/tulips/*
 !data/sample
+!data/tulips/poly
 
 # model checkpoints
 preprocessing/checkpoints/

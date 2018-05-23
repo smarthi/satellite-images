@@ -109,7 +109,7 @@ data/*
 
 # model checkpoints
 preprocessing/checkpoints/*
-!preprocessing/checkpoints/resnet100-43.params
+# !preprocessing/checkpoints/resnet100-43.params
 segmentation/checkpoints/
 preprocessing/test/
 

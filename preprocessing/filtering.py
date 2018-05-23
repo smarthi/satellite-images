@@ -4,7 +4,6 @@ import math
 
 import numpy as np
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 from skimage.io import imsave, imread
 from shutil import copyfile
@@ -79,7 +78,7 @@ def main():
     clear = []
     
     for folder in IMG_DIRS:
-        clear.extend(find_clear(folder, batch_size, net, newdir))
+        clear.extend(find_clear(folder, batch_size, net))
 
     # Move clear images to new directory
     newdir = '../data/tulips/bloom/filtered'

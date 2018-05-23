@@ -103,7 +103,10 @@ ENV/
 # OS X
 *.DS_Store
 
-data/
-images/
+# data folder
+data/cloud-classif/
+data/tulips/*
+!data/sample
+!data/tulips/poly
 preprocessing/checkpoints/
 preprocessing/test/

@@ -110,8 +110,7 @@ data/tulips/*
 !data/tulips/poly
 
 # model checkpoints
-preprocessing/checkpoints/*
-# !preprocessing/checkpoints/resnet100-43.params
+preprocessing/checkpoints/
 segmentation/checkpoints/
 preprocessing/test/
 

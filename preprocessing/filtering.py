@@ -66,9 +66,11 @@ def find_clear(root, batch_size, net, ext='.png'):
 
 
 def main():
+    root = os.path.dirname(__file__)
     IMG_DIRS = ['../data/tulips/bloom/16/']
                 #, '../data/tulips/bloom/17/']
-    CHECKPOINTS_DIR = 'checkpoints'
+    IMG_DIRS = [os.path.join(root, d) for d in IMG_DIRS]
+    CHECKPOINTS_DIR = os.path.join(root, 'checkpoints')
 
     # Load the pretrained network and use the saved weights 
     net = gluon.model_zoo.vision.resnet101_v2(classes=2, ctx=ctx)
@@ -81,7 +83,7 @@ def main():
         clear.extend(find_clear(folder, batch_size, net))
 
     # Move clear images to new directory
-    newdir = '../data/tulips/bloom/filtered'
+    newdir = os.path.join(root, '../data/tulips/bloom/filtered')
     os.makedirs(newdir, exist_ok=True)
 
     for file in clear:

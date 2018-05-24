@@ -1,13 +1,16 @@
 '''
 Script to download the blooming tulips dataset from sentinelhub
 '''
+import os
+
 from gather_data import PolygonSlidingWindow, GeoJsonSaver, BatchDownloader
 from DataRequest import TulipFieldRequest, S2Request
 
 WMS_INSTANCE = '71513b0b-264d-494a-b8c4-c3c36433db28'
 geopedia_layers = {'tulip_field_2016':'ttl1904', 'tulip_field_2017':'ttl1905', 'arable_land_2017':'ttl1917'}
 
-root_dir = '../data/tulips/bloom/'
+root_dir = os.path.join(os.path.dirname(__file__), '../data/tulips/bloom/')
+poly_dir = os.path.join(os.path.dirname(__file__), '../data/tulips/poly/')
 
 # Params
 width = 256
@@ -16,7 +19,7 @@ height = 256
 # 2016
 poly_sw_cb = PolygonSlidingWindow(box_width=2560, box_height=2560, stride_x=2304, stride_y=2304)
 poly_sw_cb.set_mode('train')
-poly_sw_cb.load_polygons_from_folder('../data/tulips/poly/16/')
+poly_sw_cb.load_polygons_from_folder(poly_dir + '16/')
 
 # Download labels
 downl_labels = BatchDownloader(root_dir + 'masks/', poly_sw_cb, TulipFieldRequest, (),
@@ -33,7 +36,7 @@ downl_imgs.download_data()
 # 2017
 poly_sw_cb = PolygonSlidingWindow(box_width=2560, box_height=2560, stride_x=2304, stride_y=2304)
 poly_sw_cb.set_mode('train')
-poly_sw_cb.load_polygons_from_folder('../data/tulips/poly/17/')
+poly_sw_cb.load_polygons_from_folder(poly_dir + '17/')
 
 # Download labels
 downl_labels = BatchDownloader(root_dir + 'masks/', poly_sw_cb, TulipFieldRequest, (),

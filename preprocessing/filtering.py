@@ -1,3 +1,7 @@
+# Filtering cloudy images
+#
+# This script serves to filter the images downloaded using the DataRequest/download_data.py utility. 
+# To do so, it uses the classifier we previously trained in preprocessing/train_classifier.py.
 import os
 import glob
 import math
@@ -46,6 +50,12 @@ def load_batch(filenames):
 
 
 def find_clear(root, batch_size, net, ext='.png'):
+    ''' 
+    Scans the directory passed as parameter to find all images and filters them
+    using the given network. 
+    
+    Returns: a list with the paths to all 'clear' images found in the directory
+    '''
     print("Scanning dir {}".format(root))
     clear = []
     files = glob.glob(root + '*wms*' + ext)

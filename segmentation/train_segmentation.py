@@ -6,7 +6,6 @@ import collections
 import unet
 
 import numpy as np
-import matplotlib.pyplot as plt
 import mxnet as mx
 import mxnet.ndarray as nd
 import mxnet.gluon as gluon
@@ -17,13 +16,12 @@ from mxnet.gluon.loss import Loss
 from mxnet import image
 from skimage.io import imsave, imread
 from datetime import datetime
+from shutil import copyfile
 
 
 #-------------------------------------
 # Data loading
 #-------------------------------------
-geopedia_layers = {'tulip_field_2016':'ttl1904', 'tulip_field_2017':'ttl1905'}
-
 class ImageWithMaskDataset(Dataset):
     """
     A dataset for loading images (with masks).
@@ -48,6 +46,7 @@ class ImageWithMaskDataset(Dataset):
         self._transform = transform
         self.imgdir = imgdir
         self._exts = ['.png']
+        self._geopedia_layers = {'tulip_field_2016':'ttl1904', 'tulip_field_2017':'ttl1905'}
         self._list_images(self._imgdir)
 
     def _list_images(self, root):
@@ -60,7 +59,7 @@ class ImageWithMaskDataset(Dataset):
             if not mask_flag:
                 patch_id = filename.split('_')[1]
                 year = datetime.strptime(filename.split('_')[3], "%Y%m%d-%H%M%S").year
-                mask_fn = 'tulip_{}_geopedia_{}.png'.format(patch_id, geopedia_layers['tulip_field_{}'.format(year)])
+                mask_fn = 'tulip_{}_geopedia_{}.png'.format(patch_id, self._geopedia_layers['tulip_field_{}'.format(year)])
                 images[name]["base"] = filename
                 images[name]["mask"] = mask_fn
         self._image_list = list(images.values())
@@ -81,42 +80,19 @@ class ImageWithMaskDataset(Dataset):
         return len(self._image_list)
 
 
-# Image transformations for data augmentation.
-def positional_augmentation(joint):
-    # Random crop
-    crop_height = img_height
-    crop_width  = img_width
-    aug = mx.image.RandomCropAug(size=(crop_width, crop_height)) # Watch out: weight before height in size param!
-    aug_joint = aug(joint)
-    return aug_joint
-
-
-def joint_transform(base, mask):
+def transform(base, mask):
     ### Convert types
     base = base.astype('float32')/255
     mask = mask.astype('float32')/255
     
-    ### Join
-    # Concatenate on channels dim, to obtain an 6 channel image
-    # (3 channels for the base image, plus 3 channels for the mask)
-    base_channels = base.shape[2] # so we know where to split later on
-    joint = mx.nd.concat(base, mask, dim=2)
-
-    ### Augmentation Part 1: positional
-    aug_joint = positional_augmentation(joint)
-    
-    ### Split
-    aug_base = aug_joint[:, :, :base_channels]
-    aug_mask = aug_joint[:, :, base_channels:]
-    
     # Convert mask to binary
-    aug_mask = (aug_mask > 0.4).astype('float32')
+    mask = (mask > 0.4).astype('float32')
     
     # Reshape the tensors so the order is now (channels, w, h)
-    aug_base =  mx.nd.transpose(aug_base, (2,0,1))
-    aug_mask =  mx.nd.transpose(aug_mask, (2,0,1))
+    base =  mx.nd.transpose(base, (2,0,1))
+    mask =  mx.nd.transpose(mask, (2,0,1))
     
-    return aug_base, aug_mask
+    return base, mask
 
 
 #-------------------------------------
@@ -261,12 +237,18 @@ def train_util(net, train_iter, val_iter, loss_fn,
                 names, train_acc = metric.get()
                 metric.reset()
                 val_acc = evaluate(val_iter, net)
-                net.save_params('%s/%d-%d.params'%(checkpoint_dir, epoch, i))
+
+                if res['val'] and val_acc > max(res['val']):      
+                    net.save_params('%s/%d-%d.params'%(checkpoint_dir, epoch, i))
+                
                 res['train'].append(train_acc)
                 res['val'].append(val_acc)
                 print("Epoch %s Batch %d| train IoU: %s | val IoU: %s " % (epoch, i, train_acc, val_acc))
-                
-        net.save_params('%s/%d-%d.params'%(checkpoint_dir, epoch, 0))
+        
+        # Only save model params if results are better than the previous ones
+        if res['val'] and val_acc > max(res['val']):      
+            net.save_params('%s/%d-%d.params'%(checkpoint_dir, epoch, 0))
+        
         names, train_acc = metric.get()
         val_acc = evaluate(val_iter, net)
         res['train'].append(train_acc)
@@ -292,10 +274,10 @@ val_dir   = os.path.join(root, '../data/tulips/bloom/val/')
 mask_dir  = os.path.join(root, '../data/tulips/bloom/masks/')
 
 # Create train and validation DataLoaders from our Datasets
-train_ds = ImageWithMaskDataset(train_dir, train_dir, transform=joint_transform)
+train_ds = ImageWithMaskDataset(train_dir, train_dir, transform=transform)
 train_iter = gluon.data.DataLoader(train_ds, batch_size)
 
-val_ds  = ImageWithMaskDataset(val_dir, mask_dir, transform=joint_transform)
+val_ds  = ImageWithMaskDataset(val_dir, mask_dir, transform=transform)
 val_iter= gluon.data.DataLoader(val_ds, batch_size)
 
 # Instantiate a U-Net and train it
@@ -307,10 +289,24 @@ trainer = gluon.Trainer(net.collect_params(), 'adam',
             {'learning_rate': 1e-4, 'beta1':0.9, 'beta2':0.99})
 
 epochs = 50
-checkpoint_dir = os.path.join(root, 'checkpoints/unet1')
+checkpoint_dir = os.path.join(root, 'checkpoints', 'unet')
 
 results = train_util(net, train_iter, val_iter, loss, trainer, ctx, epochs, checkpoint_dir)
-
 np.save(checkpoint_dir + '/results.npy', results)
+
+# Find best scoring model 
+best = results['val'].index(max(results['val'])) + 1
+epoch, batch = divmod(best, 5)
+epoch += 1
+batch = ((batch + 1)%5)*500
+best_params = os.path.join(checkpoint_dir, '{}-{}.params'.format(epoch, batch))
+
+# Copy it to <checkpoints>/best_unet.params
+save_filename = os.path.join(checkpoint_dir, 'best_unet.params')
+copyfile(best_params, save_filename)
+print('Best model on validation set: {}, saved in: {}'.format(best_params, save_filename))
+
+
+
 
 

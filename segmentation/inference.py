@@ -73,7 +73,7 @@ def main():
     net.load_params(os.path.join(checkpoint_dir, 'best_unet.params'), ctx)
 
     print("Scanning dir {}".format(imgdir))
-    files = glob.glob(os.path.join(imgdir, '*.png'))
+    files = glob.glob(os.path.join(imgdir, '*wms*.png'))
     print("Found {} images".format(len(files)))
     nbatches = math.ceil(len(files)/batch_size)
     

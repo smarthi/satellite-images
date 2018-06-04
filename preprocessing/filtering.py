@@ -88,7 +88,11 @@ def main():
 
     # Move clear images to new directory
     newdir = os.path.join(root, '../data/tulips/bloom/filtered')
-    os.makedirs(newdir, exist_ok=True)
+    try: 
+        os.makedirs(newdir)
+    except OSError:
+        if not os.path.isdir(newdir):
+            raise    
 
     for file in clear:
         copyfile(file, os.path.join(newdir, os.path.basename(file)))

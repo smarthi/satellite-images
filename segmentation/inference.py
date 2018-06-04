@@ -7,18 +7,10 @@ import argparse
 import glob
 import math
 
-import numpy as np
-import matplotlib.pyplot as plt
 import mxnet as mx
 import mxnet.ndarray as nd
-import mxnet.gluon as gluon
-import mxnet.gluon.nn as nn
 
-from mxnet.gluon.data import Dataset, DataLoader
-from mxnet.gluon.loss import Loss
-from mxnet import image
 from skimage.io import imsave, imread
-from datetime import datetime
 
 #-------------------------------------
 # Execution
@@ -33,11 +25,9 @@ class ImageReader:
         data = mx.nd.transpose(data, (2,0,1))
         return data
 
-
     def read_img(self, filename):
         img = mx.image.imread(filename)
         return self.preprocess(img)
-
 
     def load_batch(self, filenames):
         batch = mx.nd.empty((len(filenames),3,self.imgsize,self.imgsize))
@@ -56,13 +46,14 @@ def save_batch(filenames, predictions):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("dir", 
-        help="Directory containing the image files (.png) we'll run inference on. Relative to the root of the project (tulip-fields/)")
+        help="Directory containing the image files (.png) we'll run inference on. \
+              Relative to the root of the project (tulip-fields/)")
     args = parser.parse_args()
 
     ctx = mx.gpu(0)
 
     batch_size = 8
-    img_size  = 256
+    img_size = 256
 
     root = os.path.dirname(__file__)
     imgdir = os.path.join(root, os.pardir, args.dir)
@@ -75,7 +66,7 @@ def main():
     print("Scanning dir {}".format(imgdir))
     files = glob.glob(os.path.join(imgdir, '*wms*.png'))
     print("Found {} images".format(len(files)))
-    nbatches = math.ceil(len(files)/batch_size)
+    nbatches = int(math.ceil(len(files)/batch_size))
     
     reader = ImageReader(img_size, ctx)
 

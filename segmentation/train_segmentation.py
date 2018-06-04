@@ -9,12 +9,9 @@ import numpy as np
 import mxnet as mx
 import mxnet.ndarray as nd
 import mxnet.gluon as gluon
-import mxnet.gluon.nn as nn
 
-from mxnet.gluon.data import Dataset, DataLoader
+from mxnet.gluon.data import Dataset
 from mxnet.gluon.loss import Loss
-from mxnet import image
-from skimage.io import imsave, imread
 from datetime import datetime
 from shutil import copyfile
 
@@ -89,8 +86,8 @@ def transform(base, mask):
     mask = (mask > 0.4).astype('float32')
     
     # Reshape the tensors so the order is now (channels, w, h)
-    base =  mx.nd.transpose(base, (2,0,1))
-    mask =  mx.nd.transpose(mask, (2,0,1))
+    base = mx.nd.transpose(base, (2,0,1))
+    mask = mx.nd.transpose(mask, (2,0,1))
     
     return base, mask
 
@@ -122,7 +119,7 @@ class DiceCoeffLoss(Loss):
         axes = tuple(range(2, len(pred.shape)))
         intersect = nd.sum(pred * label, axis=axes)
         denom = nd.sum(pred + label, axis=axes)
-        return - (2. *intersect / (denom + self.eps)).mean(axis=1)
+        return - (2. * intersect / (denom + self.eps)).mean(axis=1)
 
 
 #-------------------------------------

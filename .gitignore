@@ -103,6 +103,9 @@ ENV/
 # mypy
 .mypy_cache/
 
+#PyCharm
+.idea
+
 # data folder
 data/cloud-classif/
 data/tulips/*

@@ -1,7 +1,6 @@
 import os
 import time
 
-import pandas as pd
 import numpy as np
 import mxnet as mx
 
@@ -202,6 +201,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-        

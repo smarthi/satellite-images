@@ -1,2 +1,2 @@
-# tulip-fields
-Repository for Amazon + Sinergise ML blog
+# tulip-fields classification
+

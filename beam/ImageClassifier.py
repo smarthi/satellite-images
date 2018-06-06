@@ -4,6 +4,7 @@ import argparse
 import logging
 import glob
 import FilterCloudyFn
+import UNetInference
 
 import apache_beam as beam
 from apache_beam.metrics import Metrics
@@ -38,8 +39,10 @@ def run(argv=None):
 
   with beam.Pipeline(options=pipeline_options) as p:
       filtered_images = (p | "Read Images" >> beam.Create(glob.glob(known_args.input + '*wms*' + '.png'))
-                         | "Batch elements" >> beam.BatchElements(0, known_args.batchsize)
+                         | "Batch elements" >> beam.BatchElements(10, known_args.batchsize)
                          | "Filter Cloudy images" >> beam.ParDo(FilterCloudyFn.FilterCloudyFn()))
+
+      filtered_images | "Segment for Land use" >> beam.ParDo(UNetInference.UNetInferenceFn(known_args.output))
 
 
 

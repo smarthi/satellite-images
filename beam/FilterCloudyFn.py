@@ -4,7 +4,7 @@ import apache_beam
 from mxnet import gluon
 from mxnet.image import color_normalize
 
-import os
+import numpy as np
 
 class FilterCloudyFn(apache_beam.DoFn):
 
@@ -45,4 +45,21 @@ class FilterCloudyFn(apache_beam.DoFn):
        :param element:
        :return:
        """
-       yield self.load_batch(element)
+       clear_images = []
+       batch = self.load_batch(element)
+       batch = batch.as_in_context(self.ctx)
+       preds = mx.nd.argmax(self.net(batch), axis=1)
+       idxs = np.arange(len(element))[preds.asnumpy() == 0]
+       print("Length of clear images")
+       print(len(idxs))
+       clear_images.extend([element[i] for i in idxs])
+       yield clear_images
+
+
+
+
+
+
+
+
+

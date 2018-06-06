@@ -6,9 +6,11 @@ from mxnet.image import color_normalize
 
 import numpy as np
 
+import os
+
 class FilterCloudyFn(apache_beam.DoFn):
 
-    def __init__(self):
+    def __init__(self, model):
         super(FilterCloudyFn, self).__init__()
         self.ctx = mx.cpu(0)
         self.mean = mx.nd.array([0.485, 0.456, 0.406], ctx=self.ctx).reshape((3, 1, 1))
@@ -18,7 +20,7 @@ class FilterCloudyFn(apache_beam.DoFn):
         ]
 
         self.net = gluon.model_zoo.vision.resnet101_v2(classes=2, ctx=self.ctx)
-        self.net.load_params('/Users/marthism/projects/satellite-images/models/resnet100-43.params')
+        self.net.load_params(os.path.join(os.path.abspath(model), 'resnet100-43.params'))
 
 
     def preprocess(self, img, augs):
@@ -50,8 +52,6 @@ class FilterCloudyFn(apache_beam.DoFn):
        batch = batch.as_in_context(self.ctx)
        preds = mx.nd.argmax(self.net(batch), axis=1)
        idxs = np.arange(len(element))[preds.asnumpy() == 0]
-       print("Length of clear images")
-       print(len(idxs))
        clear_images.extend([element[i] for i in idxs])
        yield clear_images
 

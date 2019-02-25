@@ -35,7 +35,7 @@ class UNetInferenceFn(apache_beam.DoFn):
         super(UNetInferenceFn, self).__init__()
         self.ctx = mx.cpu(0)
         self.net = unet.Unet()
-        self.net.load_params(os.path.join(os.path.dirname(model), 'best_unet.params'))
+        self.net.load_parameters(os.path.join(os.path.dirname(model), 'unet_RGB.params'), self.ctx, allow_missing=True)
         self.img_size = 256
         self.reader = ImageReader(self.img_size, self.ctx)
         self.output = output

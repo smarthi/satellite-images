@@ -39,7 +39,7 @@ def run(argv=None):
 
   with beam.Pipeline(options=pipeline_options) as p:
       filtered_images = (p | "Read Images" >> beam.Create(glob.glob(known_args.input + '*wms*' + '.png'))
-                         | "Batch elements" >> beam.BatchElements(20, known_args.batchsize)
+                         | "Batch elements" >> beam.BatchElements(3, int(known_args.batchsize))
                          | "Filter Cloudy images" >> beam.ParDo(FilterCloudyFn.FilterCloudyFn(known_args.models)))
 
       filtered_images | "Segment for Land use" >> beam.ParDo(UNetInference.UNetInferenceFn(known_args.models, known_args.output))

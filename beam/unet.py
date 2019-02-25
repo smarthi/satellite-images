@@ -7,7 +7,7 @@ def conv_block(channels, kernel_size):
     out.add(
         nn.Conv2D(channels, kernel_size, padding=1, use_bias=False),
         nn.BatchNorm(),
-        nn.Activation('relu')
+         nn.Activation('relu')
     )
     return out
 

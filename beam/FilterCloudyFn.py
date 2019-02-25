@@ -19,8 +19,9 @@ class FilterCloudyFn(apache_beam.DoFn):
             mx.image.CenterCropAug((224, 224))
         ]
 
-        self.net = gluon.model_zoo.vision.resnet101_v2(classes=2, ctx=self.ctx)
-        self.net.load_params(os.path.join(os.path.abspath(model), 'resnet100-43.params'))
+        self.net = gluon.model_zoo.vision.resnet50_v2(classes=2, ctx=self.ctx)
+        self.net.load_parameters(os.path.join(os.path.abspath(model), 'resnet50_finetuned.params'),
+                             ctx=self.ctx, allow_missing=True)
 
 
     def preprocess(self, img, augs):

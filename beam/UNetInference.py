@@ -16,6 +16,7 @@ class ImageReader:
 
     def preprocess(self, data):
         data = mx.nd.array(data).astype('float32').as_in_context(self.ctx)
+        data = data / 255
         data = mx.nd.transpose(data, (2,0,1))
         return data
 
